@@ -21,7 +21,7 @@ RUN mkdir /files && \
     find . -type f -exec sha256sum {} \;
 
 FROM alpine:3.15.0
-RUN apk add --no-cache socat openrc iptables && \
+RUN apk add --no-cache socat openrc iptables cntlm && \
     apk list --installed
 ARG REF=https://example.com/
 ARG VERSION=v0.0.0
@@ -33,4 +33,5 @@ RUN echo "$REF" > /app/ref && \
     echo "$VERSION" > /app/version && \
     ln -s /files/vpnkit/vpnkit-tap-vsockd /app/wsl-vpnkit /usr/sbin/ && \
     ln -s /app/wsl-vpnkit.service /etc/init.d/wsl-vpnkit && \
+    ln -s /app/proxy.service /etc/init.d/proxy && \
     ln -s /app/startup.sh /etc/profile.d/

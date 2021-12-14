@@ -1,0 +1,59 @@
+#! /bin/sh
+set -o errexit 
+PID_PATH="/var/run/cntlm.pid"
+LOG_PATH="/var/log/cntlm.log"
+
+ret=0
+
+start() {
+    /app/prepare-proxy.sh
+    if [ ! -f /app/proxy.json ]; then
+      echo "Proxy config not found"
+      false
+    fi
+    start-stop-daemon \
+        --pidfile $PID_PATH \
+        --background \
+        --stdout $LOG_PATH \
+        --stderr $LOG_PATH \
+        --exec cntlm \
+        --start -- -P $PID_PATH
+    ret=$?
+}
+
+stop() {
+cat <<EOF >/app/proxy.json
+{"exclude": "*","transparent_http_ports": [],"transparent_https_ports": []}
+EOF
+    start-stop-daemon \
+        --pidfile $PID_PATH \
+        --stop
+    ret=$?
+}
+
+reset() {
+    stop
+    echo "" >/etc/cntlm.conf
+    ret=$?
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    reset)
+        reset
+        ;;
+    *)
+        echo "Usage: proxy {start|stop|reset}"
+        echo
+        echo "start  : Start cntlm daemon. Asks password at first run"
+        echo "stop   : Stop cntlm daemon"
+        echo "reset  : Clear stored password hash"
+        exit 1
+esac
+
+exit $ret

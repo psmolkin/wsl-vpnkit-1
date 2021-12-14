@@ -6,7 +6,7 @@ CONF_PATH="$USERPROFILE/wsl-vpnkit/wsl-vpnkit.conf"
 SOCKET_PATH="/var/run/wsl-vpnkit.sock"
 PIPE_PATH="//./pipe/wsl-vpnkit"
 TAP_PID_PATH="/var/run/vpnkit-tap-vsockd.pid"
-
+HTTP_PROXY_CONFIG_PATH="/app/proxy.json"
 VPNKIT_STORE="/files/vpnkit/vpnkit.exe"
 NPIPERELAY_STORE="/files/npiperelay/npiperelay.exe"
 VPNKIT_PATH="$USERPROFILE/wsl-vpnkit/wsl-vpnkit.exe"
@@ -97,6 +97,9 @@ vpnkit () {
     '
     if [ "$VPNKIT_DEBUG" ]; then
         CMD="$CMD"' --debug'
+    fi
+    if [ "$HTTP_PROXY_CONFIG_PATH" ]; then
+        CMD="$CMD"' --http "$(wslpath -m ${HTTP_PROXY_CONFIG_PATH})"'
     fi
     eval "$CMD"
 }
